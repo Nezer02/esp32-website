@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robot Controller with SockJS</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .message-box {
+            margin-top: 20px;
+            font-size: 18px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+            min-height: 50px;
+        }
+
+        .message-box p {
+            margin: 0;
+            padding: 5px;
+            font-size: 20px;
+        }
+
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Robot Controller</h1>
+    <div>
+        <button onclick="sendMessage('UP')">Move Up</button>
+        <button onclick="sendMessage('DOWN')">Move Down</button>
+        <button onclick="sendMessage('LEFT')">Move Left</button>
+        <button onclick="sendMessage('RIGHT')">Move Right</button>
+    </div>
+
+    <div class="message-box">
+        <h3>Latest Message:</h3>
+        <p id="latestMessage">Waiting for messages...</p>
+    </div>
+
+    <!-- Add SockJS and STOMP.js libraries -->
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+
+    <script>
+        // Connect to SockJS and STOMP WebSocket
+        const socket = new SockJS('http://64.226.97.54:9090/chat-socket'); 
+        const stompClient = Stomp.over(socket);
+
+        // Connect to the WebSocket server and subscribe to the robot's topic
+        stompClient.connect({}, function (frame) {
+            console.log("✅ Connected to WebSocket");
+
+            // Subscribe to the topic for the specific robot (e.g., robot5)
+            stompClient.subscribe('/topic/robot1', function (message) {
+                const data = JSON.parse(message.body);
+                document.getElementById('latestMessage').textContent = data.direction || 'No direction found';
+                console.log(data.direction);
+            });
+        });
+
+        // Send message to the server when a control button is clicked
+        function sendMessage(direction) {
+            const message = JSON.stringify({ direction: direction });
+            stompClient.send("/app/chat/robot1", {}, message); // Send to the correct endpoint for your server
+            console.log("✅ Message sent to WebSocket");
+        }
+        function sendMessage(direction) {
+            const message = JSON.stringify({ direction: direction });
+        
+            // WebSocket vasitəsilə mesajı serverə göndər
+            stompClient.send("/app/chat/robot1", {}, message);
+            
+            console.log("✅ JS mesaj göndərdi:", direction);
+        }
+    </script>
+</body>
+
+</html>
