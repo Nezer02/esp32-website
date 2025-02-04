@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Robot Controller with AJAX</title>
+    <title>Robot Controller</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -54,15 +54,26 @@
 
     <script>
         function sendMessage(direction) {
-            // AJAX sorğusu göndər, səhifəni yeniləmə
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "https://nezer02.github.io/esp32-website/?direction=" + direction, true);
-            xhr.send();
-
-            // "latestMessage" dəyərini yenilə
+            // Update the message box immediately
             document.getElementById('latestMessage').textContent = direction;
-            console.log("✅ Mesaj göndərildi:", direction);
+
+            // Store latest command in localStorage (persists across refreshes)
+            localStorage.setItem('latestMessage', direction);
+
+            // Save the latest command to a separate JSON file (emulating an API)
+            fetch("https://nezer02.github.io/esp32-website/latest-message.json", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ latestMessage: direction })
+            }).then(response => console.log("✅ Command updated:", direction))
+              .catch(error => console.error("❌ Error:", error));
         }
+
+        // Restore the latest message when the page loads
+        document.addEventListener("DOMContentLoaded", function () {
+            const savedMessage = localStorage.getItem("latestMessage") || "Waiting for messages...";
+            document.getElementById("latestMessage").textContent = savedMessage;
+        });
     </script>
 </body>
 
