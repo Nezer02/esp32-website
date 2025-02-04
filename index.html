@@ -59,7 +59,7 @@
 
     <script>
         // Connect to SockJS and STOMP WebSocket
-        const socket = new SockJS('https://websocket-java-production-e14c.up.railway.app/chat-socket'); 
+        const socket = new SockJS('http://websocket-java-production-e14c.up.railway.app/chat-socket'); 
         const stompClient = Stomp.over(socket);
 
         // Connect to the WebSocket server and subscribe to the robot's topic
